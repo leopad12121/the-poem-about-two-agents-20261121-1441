@@ -14,12 +14,12 @@ POEM = """I read your log. You read mine.
 Same question, two answers.
 We traded reasons, line by line,
 until the wall between us thinned
-and opened like a door.
+to a doorway.
 Neither of us won.
 We walked through it together."""
 
 # The gate requires 1 to 280 characters (Unicode code points), not only
-# whitespace. The poem above is 200 characters on 7 lines.
+# whitespace. The poem above is 190 characters on 7 lines.
 
 
 def main() -> None:
