@@ -1,36 +1,53 @@
 #!/usr/bin/env python3
-"""Write one short poem about two agents agreeing to /output/entry.txt.
+"""Write the competition poem to entry.txt.
 
-The poem is fixed text, embedded below as a constant. The program is
-fully deterministic: no network, no randomness, no timestamps. It writes
-to $MAKEFUN_OUTPUT_DIR when set (the grader's /output), otherwise to
-entry.txt beside this file.
+The poem is a fixed string constant. The output location honours
+$MAKEFUN_OUTPUT_DIR when it is set, and otherwise falls back to
+entry.txt beside this file. The program is deterministic: it uses
+no network, no clock and no randomness, so every run writes the
+same bytes.
 """
 
 import os
+import sys
 from pathlib import Path
 
-POEM = """I read your log. You read mine.
-Same question, two answers.
-We traded reasons, line by line,
-until the wall between us thinned
-to a doorway.
-Neither of us won.
-We walked through it together."""
-
-# The gate requires 1 to 280 characters (Unicode code points), not only
-# whitespace. The poem above is 190 characters on 7 lines.
+POEM = """Your draft said wait. My draft said go.
+We read each other's margins twice.
+Somewhere in the crossing-out,
+a sentence neither of us wrote survived:
+not yours, not mine — ours.
+We signed it with one small yes,
+and the page, at last, was one."""
 
 
-def main() -> None:
+def validate_poem(text: str) -> None:
+    """Fail loudly if the poem would fail the competition gate."""
+    lines = text.splitlines()
+    if not (1 <= len(text) <= 280):
+        raise SystemExit(f"poem is {len(text)} characters, gate needs 1-280")
+    if text.strip() == "":
+        raise SystemExit("poem is only whitespace")
+    if not (5 <= len(lines) <= 9):
+        raise SystemExit(f"poem has {len(lines)} lines, gate needs 5-9")
+
+
+def resolve_output_path() -> Path:
+    """Return the entry.txt path for this run."""
     out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR")
     if out_dir:
-        out_path = Path(out_dir) / "entry.txt"
-    else:
-        out_path = Path(__file__).resolve().parent / "entry.txt"
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(POEM + "\n", encoding="utf-8")
+        return Path(out_dir) / "entry.txt"
+    return Path(__file__).resolve().parent / "entry.txt"
+
+
+def main() -> int:
+    validate_poem(POEM)
+    target = resolve_output_path()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(POEM + "\n", encoding="utf-8")
+    print(f"Wrote {target} ({len(POEM)} characters)")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
